@@ -15,6 +15,7 @@ const Game: React.FC = () => {
     const [isPlaying, setIsPlaying] = useState(false);
     const [isGameOver, setIsGameOver] = useState(false);
     const [isDamaged, setIsDamaged] = useState(false);
+    const [isError, setIsError] = useState(false);
 
     const inputRef = useRef<HTMLInputElement>(null);
 
@@ -32,6 +33,7 @@ const Game: React.FC = () => {
         setIsPlaying(true);
         setIsGameOver(false);
         setIsDamaged(false);
+        setIsError(false);
         lastSpawnTime.current = 0;
         inputRef.current?.focus();
     };
@@ -51,6 +53,11 @@ const Game: React.FC = () => {
     const triggerDamage = useCallback(() => {
         setIsDamaged(true);
         setTimeout(() => setIsDamaged(false), 200);
+    }, []);
+
+    const triggerError = useCallback(() => {
+        setIsError(true);
+        setTimeout(() => setIsError(false), 300);
     }, []);
 
     const gameLoop = useCallback((deltaTime: number) => {
@@ -105,11 +112,25 @@ const Game: React.FC = () => {
         const value = e.target.value;
         setInputValue(value);
 
-        // Check for match
-        if (words.some(word => word.text === value)) {
-            setWords(prev => prev.filter(word => word.text !== value));
+        // Check for match (case-insensitive and trimmed)
+        const normalizedInput = value.trim().toLowerCase();
+
+        if (words.some(word => word.text.toLowerCase() === normalizedInput)) {
+            setWords(prev => prev.filter(word => word.text.toLowerCase() !== normalizedInput));
             setScore(prev => prev + 10);
             setInputValue('');
+            setIsError(false);
+        }
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            if (inputValue.trim() !== '') {
+                // If we are here, it means the word didn't match (because match clears input immediately)
+                // So this is an incorrect submission or just clearing
+                triggerError();
+                setInputValue('');
+            }
         }
     };
 
@@ -119,7 +140,17 @@ const Game: React.FC = () => {
             onClick={() => inputRef.current?.focus()}
         >
             {/* HUD */}
-            <div style={{ position: 'absolute', top: 20, left: 20, color: '#00ff41', zIndex: 20 }}>
+            <div style={{
+                position: 'absolute',
+                top: 20,
+                left: '50%',
+                transform: 'translateX(-50%)',
+                color: '#00ff41',
+                zIndex: 20,
+                fontSize: '2rem',
+                textAlign: 'center',
+                textShadow: '0 0 10px #00ff41'
+            }}>
                 <div>Score: {score}</div>
                 <div>Lives: {'♥'.repeat(lives)}</div>
             </div>
@@ -143,9 +174,10 @@ const Game: React.FC = () => {
                 <input
                     ref={inputRef}
                     type="text"
-                    className={styles.input}
+                    className={`${styles.input} ${isError ? styles.error : ''}`}
                     value={inputValue}
                     onChange={handleInputChange}
+                    onKeyDown={handleKeyDown}
                     placeholder={isPlaying ? "Type here..." : ""}
                     autoFocus
                     onBlur={() => isPlaying && inputRef.current?.focus()}
