@@ -1,0 +1,10 @@
+.word {
+    position: absolute;
+    color: var(--color-primary);
+    font-family: var(--font-mono);
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-shadow: 0 0 5px var(--color-primary);
+    white-space: nowrap;
+    user-select: none;
+}

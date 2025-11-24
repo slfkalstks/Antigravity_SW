@@ -1,0 +1,26 @@
+:root {
+  --color-bg: #0d0d0d;
+  --color-primary: #00ff41; /* Matrix Green */
+  --color-secondary: #003b00; /* Dark Green */
+  --color-text: #e0e0e0;
+  --color-error: #ff3333;
+  --font-mono: 'Courier New', Courier, monospace;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-mono);
+  overflow: hidden; /* Prevent scrolling */
+}
+
+* {
+  box-sizing: border-box;
+}
+
+button {
+  font-family: var(--font-mono);
+  cursor: pointer;
+}
